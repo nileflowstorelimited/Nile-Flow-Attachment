@@ -79,6 +79,17 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .feedback.is-info{color:var(--muted)}
 .feedback.is-success{color:var(--green)}
 .app-feedback{min-height:22px;margin:3px 0 12px}
+.dashboard-layout{display:grid;grid-template-columns:210px minmax(0,1fr);align-items:start;gap:25px}
+.dashboard-sidebar{position:sticky;top:20px;padding:16px 11px;border:1px solid var(--line);border-radius:15px;background:#fff;box-shadow:0 4px 15px rgba(20,48,38,.025)}
+.sidebar-heading{margin:0 9px 11px;color:#829087;font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+.sidebar-nav{display:grid;gap:4px}
+.sidebar-link{width:100%;min-height:38px;display:flex;align-items:center;justify-content:space-between;gap:9px;padding:8px 10px;border:0;border-radius:9px;background:transparent;color:#56645c;text-align:left;font-size:12px;font-weight:630;transition:background .16s ease,color .16s ease}
+.sidebar-link:hover{background:#f4f7f4;color:var(--forest)}
+.sidebar-link[aria-current="page"]{background:var(--green-soft);color:var(--forest);font-weight:740}
+.sidebar-link-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sidebar-count{min-width:22px;height:22px;display:grid;place-items:center;padding:0 6px;border-radius:999px;background:#f0f3f0;color:#657169;font-size:10px;font-weight:730}
+.sidebar-link[aria-current="page"] .sidebar-count{background:#fff;color:var(--green)}
+.dashboard-content{min-width:0}
 .kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 38px}
 .kpi{min-height:110px;padding:17px 17px 15px;border:1px solid var(--line);border-radius:15px;background:#fff;box-shadow:0 4px 15px rgba(20,48,38,.025)}
 .kpi-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -163,6 +174,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .page-footer{display:flex;justify-content:space-between;gap:16px;margin-top:48px;padding-top:18px;border-top:1px solid var(--line);color:#818c85;font-size:11px}
 .page-footer span:last-child{text-align:right}
 @media(max-width:900px){
+  .dashboard-layout{grid-template-columns:1fr;gap:16px}
+  .dashboard-sidebar{position:static;padding:12px}
+  .sidebar-heading{margin:0 3px 8px}
+  .sidebar-nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin}
+  .sidebar-link{width:auto;flex:0 0 auto;justify-content:flex-start;white-space:nowrap}
   .signin-intro{padding:34px}
   .signin-action{padding:32px}
 }
@@ -182,6 +198,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   .signin-intro h2{max-width:400px;font-size:27px}
   .signin-intro p:last-child{margin-top:9px}
   .signin-action{padding:26px}
+  .dashboard-sidebar{padding:10px}
+  .sidebar-link{min-height:36px;padding:7px 9px;font-size:11px}
   .kpis{gap:8px;margin-bottom:29px}
   .kpi{min-height:91px;padding:12px}
   .kpi-label{font-size:10px}
@@ -257,13 +275,21 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   </section>
 
   <section id="app" class="is-hidden" aria-label="Your task dashboard">
-    <div class="dashboard-bar">
-      <div><h2>Your progress at a glance</h2><p>Stay on top of your work and keep your supervisor up to date.</p></div>
-      <button class="button-refresh" id="refresh" type="button"><span class="refresh-icon" aria-hidden="true">↻</span> Refresh</button>
+    <div class="dashboard-layout">
+      <aside class="dashboard-sidebar" aria-label="Task navigation">
+        <p class="sidebar-heading">Workspace</p>
+        <nav class="sidebar-nav" id="sideNav" aria-label="Filter tasks by status"></nav>
+      </aside>
+      <div class="dashboard-content">
+        <div class="dashboard-bar">
+          <div><h2>Your progress at a glance</h2><p>Stay on top of your work and keep your supervisor up to date.</p></div>
+          <button class="button-refresh" id="refresh" type="button"><span class="refresh-icon" aria-hidden="true">↻</span> Refresh</button>
+        </div>
+        <div class="feedback app-feedback" id="appStatus" role="status" aria-live="polite"></div>
+        <div id="kpis" class="kpis" aria-label="Task status summary"></div>
+        <div id="lists"></div>
+      </div>
     </div>
-    <div class="feedback app-feedback" id="appStatus" role="status" aria-live="polite"></div>
-    <div id="kpis" class="kpis" aria-label="Task status summary"></div>
-    <div id="lists"></div>
   </section>
 
   <footer class="page-footer">
@@ -279,6 +305,7 @@ var GOOGLE_CLIENT_ID = '1012978505363-ffg928t7617tdd2ife8b3abeonfbcvao.apps.goog
 var API_URL = 'https://nile-flow-api.onrender.com/api';
 /* ========================================================================================= */
 var idToken = null;
+var activeFilter = 'all';
 var el = function(tag, props, text){
   var node = document.createElement(tag);
   if(props) Object.keys(props).forEach(function(key){ node[key]=props[key]; });
@@ -401,6 +428,7 @@ function render(data){
     {title:'Completed',key:'completed',items:by('Completed')}
   ];
   renderKpis(groups);
+  renderSidebar(groups,tasks.length);
   var lists = document.getElementById('lists');
   lists.replaceChildren();
   if(!tasks.length){
@@ -413,7 +441,7 @@ function render(data){
   }
   groups.forEach(function(group){
     if(!group.items.length) return;
-    var section = el('section',{className:'task-section','aria-label':group.title+' tasks'});
+    var section = el('section',{className:'task-section',id:'task-section-'+group.key,'aria-label':group.title+' tasks'});
     var heading = el('div',{className:'section-heading'});
     heading.appendChild(el('h2',null,group.title));
     heading.appendChild(el('span',{className:'section-count','aria-label':group.items.length+' tasks'},String(group.items.length)));
@@ -422,6 +450,34 @@ function render(data){
     group.items.forEach(function(task){grid.appendChild(card(task));});
     section.appendChild(grid);
     lists.appendChild(section);
+  });
+  applyTaskFilter();
+}
+function renderSidebar(groups,total){
+  var nav = document.getElementById('sideNav');
+  nav.replaceChildren();
+  var entries = [{title:'All tasks',key:'all',count:total}].concat(groups.filter(function(group){return group.items.length;}).map(function(group){
+    return {title:group.title,key:group.key,count:group.items.length};
+  }));
+  if(activeFilter!=='all' && !entries.some(function(entry){return entry.key===activeFilter;})) activeFilter='all';
+  entries.forEach(function(entry){
+    var button = el('button',{className:'sidebar-link',type:'button','aria-current':entry.key===activeFilter?'page':'false'});
+    button.appendChild(el('span',{className:'sidebar-link-label'},entry.title));
+    button.appendChild(el('span',{className:'sidebar-count','aria-label':entry.count+' tasks'},String(entry.count)));
+    button.addEventListener('click',function(){
+      activeFilter=entry.key;
+      Array.prototype.forEach.call(nav.querySelectorAll('.sidebar-link'),function(link){
+        link.setAttribute('aria-current',link===button?'page':'false');
+      });
+      applyTaskFilter();
+    });
+    nav.appendChild(button);
+  });
+}
+function applyTaskFilter(){
+  var sections = document.querySelectorAll('#lists .task-section');
+  Array.prototype.forEach.call(sections,function(section){
+    section.classList.toggle('is-hidden',activeFilter!=='all' && section.id!=='task-section-'+activeFilter);
   });
 }
 function renderKpis(groups){
