@@ -142,6 +142,8 @@ function createServer({ upstreamUrl, portalOrigin, fetchImpl = globalThis.fetch 
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
       });
       const upstreamBody = await upstreamResponse.text();
+      const finalUpstreamUrl = new URL(upstreamResponse.url || config.upstreamUrl);
+      const upstreamLocation = `${finalUpstreamUrl.origin}${finalUpstreamUrl.pathname}`;
       if (Buffer.byteLength(upstreamBody, 'utf8') > MAX_RESPONSE_BYTES) {
         jsonResponse(response, 502, { ok: false, error: 'API response was too large.' }, config.portalOrigin);
         return;
@@ -154,7 +156,8 @@ function createServer({ upstreamUrl, portalOrigin, fetchImpl = globalThis.fetch 
         console.error(
           'Apps Script returned a non-JSON response:',
           upstreamResponse.status,
-          upstreamResponse.headers.get('content-type') || 'unknown content type'
+          upstreamResponse.headers.get('content-type') || 'unknown content type',
+          upstreamLocation
         );
         jsonResponse(response, 502, { ok: false, error: 'API returned an invalid response.' }, config.portalOrigin);
         return;
@@ -164,7 +167,8 @@ function createServer({ upstreamUrl, portalOrigin, fetchImpl = globalThis.fetch 
         console.error(
           'Apps Script returned an HTTP error:',
           upstreamResponse.status,
-          upstreamResponse.headers.get('content-type') || 'unknown content type'
+          upstreamResponse.headers.get('content-type') || 'unknown content type',
+          upstreamLocation
         );
         jsonResponse(response, 502, { ok: false, error: 'API request could not be completed.' }, config.portalOrigin);
         return;
