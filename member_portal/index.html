@@ -37,7 +37,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .is-hidden{display:none!important}
 .topbar{position:relative;z-index:1;background:var(--forest);color:#fff}
 .topbar:after{position:absolute;right:0;top:0;width:34%;height:100%;background:linear-gradient(110deg,transparent,rgba(255,255,255,.045));content:"";pointer-events:none}
-.topbar-inner{position:relative;z-index:1;max-width:1180px;min-height:78px;margin:0 auto;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.topbar-inner{position:relative;z-index:1;max-width:1680px;min-height:78px;margin:0 auto;padding:14px clamp(22px,3.2vw,52px);display:flex;align-items:center;justify-content:space-between;gap:20px}
 .brand{display:flex;align-items:center;gap:13px;min-width:0}
 .brand-mark{width:42px;height:42px;flex:0 0 auto;display:grid;place-items:center;border:1px solid rgba(255,255,255,.22);border-radius:13px;background:rgba(255,255,255,.09);font-size:13px;font-weight:800;letter-spacing:.08em}
 .brand-copy{min-width:0}
@@ -48,7 +48,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .avatar{width:32px;height:32px;display:grid;place-items:center;border-radius:50%;background:#d8e9dd;color:var(--forest);font-size:12px;font-weight:750}
 .button-quiet{padding:8px 12px;border:1px solid rgba(255,255,255,.26);border-radius:9px;background:transparent;color:#fff;font-size:13px;font-weight:650;transition:background .18s ease,border-color .18s ease}
 .button-quiet:hover{border-color:rgba(255,255,255,.55);background:rgba(255,255,255,.1)}
-.page-shell{max-width:1124px;margin:0 auto;padding:48px 28px 72px}
+.page-shell{width:100%;max-width:1680px;min-height:calc(100vh - 78px);min-height:calc(100svh - 78px);margin:0 auto;padding:36px clamp(22px,3.2vw,52px) 20px;display:flex;flex-direction:column}
 .eyebrow{margin:0 0 10px;color:var(--green);font-size:11px;font-weight:800;letter-spacing:.15em;text-transform:uppercase}
 .page-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:28px}
 .page-heading h1{margin:0;color:var(--forest-deep);font-size:clamp(30px,4vw,42px);font-weight:720;letter-spacing:-.045em;line-height:1.12}
@@ -79,7 +79,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .feedback.is-info{color:var(--muted)}
 .feedback.is-success{color:var(--green)}
 .app-feedback{min-height:22px;margin:3px 0 12px}
-.dashboard-layout{display:grid;grid-template-columns:210px minmax(0,1fr);align-items:start;gap:25px}
+.dashboard-layout{display:grid;grid-template-columns:230px minmax(0,1fr);align-items:start;gap:26px}
 .dashboard-sidebar{position:sticky;top:20px;padding:16px 11px;border:1px solid var(--line);border-radius:15px;background:#fff;box-shadow:0 4px 15px rgba(20,48,38,.025)}
 .sidebar-heading{margin:0 9px 11px;color:#829087;font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
 .sidebar-nav{display:grid;gap:4px}
@@ -171,7 +171,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .loading-state{padding:30px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--muted);text-align:center;font-size:13px}
 .spinner{width:16px;height:16px;display:inline-block;margin-right:8px;border:2px solid #d6e5da;border-top-color:var(--green);border-radius:50%;vertical-align:-3px;animation:spin .75s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.page-footer{display:flex;justify-content:space-between;gap:16px;margin-top:48px;padding-top:18px;border-top:1px solid var(--line);color:#818c85;font-size:11px}
+.page-footer{display:flex;justify-content:space-between;gap:16px;margin-top:auto;padding-top:18px;border-top:1px solid var(--line);color:#818c85;font-size:11px}
 .page-footer span:last-child{text-align:right}
 @media(max-width:900px){
   .dashboard-layout{grid-template-columns:1fr;gap:16px}
@@ -189,7 +189,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   .member-chip{font-size:0}
   .avatar{font-size:12px}
   .button-quiet{padding:7px 9px;font-size:12px}
-  .page-shell{padding:32px 18px 48px}
+  .page-shell{min-height:calc(100vh - 68px);min-height:calc(100svh - 68px);padding:28px 18px 16px}
   .page-heading{align-items:flex-start;margin-bottom:21px}
   .heading-date{display:none}
   .signin-panel{grid-template-columns:1fr}
@@ -287,7 +287,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         </div>
         <div class="feedback app-feedback" id="appStatus" role="status" aria-live="polite"></div>
         <div id="kpis" class="kpis" aria-label="Task status summary"></div>
-        <div id="lists"></div>
+        <div id="lists" class="task-grid"></div>
       </div>
     </div>
   </section>
@@ -430,9 +430,10 @@ function render(data){
   renderKpis(groups);
   renderSidebar(groups,tasks.length);
   var lists = document.getElementById('lists');
+  lists.className = 'task-grid';
   lists.replaceChildren();
   if(!tasks.length){
-    var empty = el('div',{className:'empty-state'});
+    var empty = el('div',{className:'empty-state','data-filter-key':'all'});
     empty.appendChild(el('div',{className:'empty-mark','aria-hidden':'true'},'✓'));
     empty.appendChild(el('h3',null,'You’re all caught up'));
     empty.appendChild(el('p',null,'There are no tasks assigned to you right now. New work will appear here when your supervisor assigns it.'));
@@ -440,16 +441,11 @@ function render(data){
     return;
   }
   groups.forEach(function(group){
-    if(!group.items.length) return;
-    var section = el('section',{className:'task-section',id:'task-section-'+group.key,'aria-label':group.title+' tasks'});
-    var heading = el('div',{className:'section-heading'});
-    heading.appendChild(el('h2',null,group.title));
-    heading.appendChild(el('span',{className:'section-count','aria-label':group.items.length+' tasks'},String(group.items.length)));
-    section.appendChild(heading);
-    var grid = el('div',{className:'task-grid'});
-    group.items.forEach(function(task){grid.appendChild(card(task));});
-    section.appendChild(grid);
-    lists.appendChild(section);
+    group.items.forEach(function(task){
+      var taskCard = card(task);
+      taskCard.setAttribute('data-filter-key',group.key);
+      lists.appendChild(taskCard);
+    });
   });
   applyTaskFilter();
 }
@@ -475,9 +471,9 @@ function renderSidebar(groups,total){
   });
 }
 function applyTaskFilter(){
-  var sections = document.querySelectorAll('#lists .task-section');
-  Array.prototype.forEach.call(sections,function(section){
-    section.classList.toggle('is-hidden',activeFilter!=='all' && section.id!=='task-section-'+activeFilter);
+  var taskCards = document.querySelectorAll('#lists .task-card');
+  Array.prototype.forEach.call(taskCards,function(taskCard){
+    taskCard.classList.toggle('is-hidden',activeFilter!=='all' && taskCard.getAttribute('data-filter-key')!==activeFilter);
   });
 }
 function renderKpis(groups){
