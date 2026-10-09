@@ -1,0 +1,56 @@
+[
+  {
+    "id": 1,
+    "scenario": "Member A can view Member A's tasks",
+    "status": "PASSED (mocked)",
+    "evidence": "Returns A1, A2, A3 only; progress converted to percent."
+  },
+  {
+    "id": 2,
+    "scenario": "Member A cannot view Member B's tasks",
+    "status": "PASSED (mocked)",
+    "evidence": "Response contains no B task IDs, content, email or evaluation text, even when the body names B's member ID and email."
+  },
+  {
+    "id": 3,
+    "scenario": "Member A cannot edit Member B's tasks",
+    "status": "PASSED (mocked)",
+    "evidence": "B1 unchanged; \"not yours\" and \"does not exist\" return the identical error. Denial written to Audit Log."
+  },
+  {
+    "id": 4,
+    "scenario": "Member A cannot change deadlines, assignments, supervisor feedback or evaluation records",
+    "status": "PASSED (mocked)",
+    "evidence": "15 protected columns each rejected with the sheet unchanged. No evaluation endpoint exists (unknown actions refused). Mixed payloads (allowed + forbidden field) are rejected whole."
+  },
+  {
+    "id": 5,
+    "scenario": "A supervisor can view and manage all authorised tasks",
+    "status": "UNVERIFIED",
+    "evidence": "Supervisors work directly in the private master workbook through Google Sheets sharing (Editor on named accounts). The API deliberately has no supervisor mode. Needs a live check with real supervisor accounts after sharing is configured."
+  },
+  {
+    "id": 6,
+    "scenario": "No bypass via task ID, query/URL parameter or submitted values",
+    "status": "PASSED (mocked)",
+    "evidence": "Altered IDs (case, spaces, injection strings, arrays, objects, null), body memberId/email and query params all fail; sheet unchanged. doGet returns no data."
+  },
+  {
+    "id": 7,
+    "scenario": "Unauthenticated users cannot access private task data",
+    "status": "PASSED (mocked)",
+    "evidence": "Missing, malformed, expired, wrong-audience, wrong-issuer, unverified-email and unknown tokens, a valid Google account not in the directory, bad JSON, and an unconfigured client ID all return no data."
+  },
+  {
+    "id": 8,
+    "scenario": "Deactivated members can no longer access the member interface",
+    "status": "PASSED (mocked)",
+    "evidence": "Inactive status, past Programme End, and a live flip to Inactive all block the next request."
+  },
+  {
+    "id": 9,
+    "scenario": "Formula-driven and confidential fields cannot be modified through the update workflow",
+    "status": "PASSED (mocked)",
+    "evidence": "Formula/script-set columns refused; members cannot set Completed; Approved/Completed tasks locked; text starting with \"=\" is stored as text-formatted plain text (mock verifies format call, not Sheets rendering)."
+  }
+]
