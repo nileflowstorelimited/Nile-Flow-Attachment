@@ -1,109 +1,591 @@
 <!doctype html>
-<html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com; frame-src https://accounts.google.com; connect-src https://script.google.com https://script.googleusercontent.com https://accounts.google.com https://nile-flow-api.onrender.com; style-src 'self' 'unsafe-inline' https://accounts.google.com; img-src 'self' data: https:">
-<title>Nile Flow Attachment: My Tasks</title>
+<meta name="theme-color" content="#123d32">
+<title>My Tasks | Nile Flow Attachment</title>
 <style>
-:root{--g:#1b4332;--m:#2d6a4f;--l:#d8f3dc;--bg:#f6faf7;--t:#1d2b24;--r:#c00000;--a:#bf8f00;--b:#2e75b6}
-*{box-sizing:border-box}body{margin:0;font:15px/1.45 system-ui,Arial,sans-serif;background:var(--bg);color:var(--t)}
-header{background:var(--g);color:#fff;padding:14px 16px}header h1{margin:0;font-size:18px}header p{margin:2px 0 0;font-size:13px;opacity:.85}
-main{max-width:860px;margin:0 auto;padding:16px}
-.card{background:#fff;border:1px solid #d5e3da;border-radius:10px;padding:14px;margin:10px 0}
-.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600;color:#fff}
-.s-Not\ Started{background:#7f7f7f}.s-In\ Progress{background:var(--b)}.s-Blocked{background:var(--r)}.s-Submitted\ for\ Review{background:var(--a)}.s-Completed{background:#2e7d32}
-h2{font-size:15px;margin:22px 0 4px;color:var(--m)}
-.meta{font-size:13px;color:#4d5f55}
-label{display:block;font-size:13px;font-weight:600;margin:10px 0 3px}
-input,select,textarea{width:100%;padding:8px;border:1px solid #b9cdc0;border-radius:6px;font:inherit}
-button{background:var(--m);color:#fff;border:0;border-radius:6px;padding:9px 16px;font:inherit;cursor:pointer;margin-top:12px}
-button.sec{background:#fff;color:var(--m);border:1px solid var(--m)}
-.err{color:var(--r);font-size:13px;margin-top:8px}.ok{color:#2e7d32;font-size:13px;margin-top:8px}
-.kpis{display:flex;gap:8px;flex-wrap:wrap}.kpi{flex:1 1 90px;background:#fff;border:1px solid #d5e3da;border-radius:8px;padding:8px;text-align:center}
-.kpi b{display:block;font-size:20px;color:var(--g)}
-.late{color:var(--r);font-weight:600}
-.hide{display:none}
-</style></head>
+:root{
+  color-scheme:light;
+  --forest:#123d32;
+  --forest-deep:#0d3028;
+  --green:#176a52;
+  --green-soft:#e8f3ed;
+  --mint:#f0f6f2;
+  --paper:#f7f8f5;
+  --white:#fff;
+  --ink:#1d2b26;
+  --muted:#66746e;
+  --line:#e1e8e3;
+  --amber:#95620c;
+  --amber-soft:#fff5df;
+  --red:#a73932;
+  --red-soft:#fff0ed;
+  --blue:#376893;
+  --blue-soft:#edf4fb;
+  --shadow:0 12px 35px rgba(20,48,38,.07);
+  --radius:18px;
+}
+*{box-sizing:border-box}
+html{min-width:320px;scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid #9fcab6;outline-offset:3px}
+.is-hidden{display:none!important}
+.topbar{position:relative;z-index:1;background:var(--forest);color:#fff}
+.topbar:after{position:absolute;right:0;top:0;width:34%;height:100%;background:linear-gradient(110deg,transparent,rgba(255,255,255,.045));content:"";pointer-events:none}
+.topbar-inner{position:relative;z-index:1;max-width:1180px;min-height:78px;margin:0 auto;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:flex;align-items:center;gap:13px;min-width:0}
+.brand-mark{width:42px;height:42px;flex:0 0 auto;display:grid;place-items:center;border:1px solid rgba(255,255,255,.22);border-radius:13px;background:rgba(255,255,255,.09);font-size:13px;font-weight:800;letter-spacing:.08em}
+.brand-copy{min-width:0}
+.brand-name{margin:0;font-size:14px;font-weight:720;letter-spacing:.01em}
+.brand-subtitle{margin:2px 0 0;color:rgba(255,255,255,.69);font-size:12px}
+.header-actions{display:flex;align-items:center;gap:12px}
+.member-chip{display:flex;align-items:center;gap:9px;color:rgba(255,255,255,.9);font-size:13px}
+.avatar{width:32px;height:32px;display:grid;place-items:center;border-radius:50%;background:#d8e9dd;color:var(--forest);font-size:12px;font-weight:750}
+.button-quiet{padding:8px 12px;border:1px solid rgba(255,255,255,.26);border-radius:9px;background:transparent;color:#fff;font-size:13px;font-weight:650;transition:background .18s ease,border-color .18s ease}
+.button-quiet:hover{border-color:rgba(255,255,255,.55);background:rgba(255,255,255,.1)}
+.page-shell{max-width:1124px;margin:0 auto;padding:48px 28px 72px}
+.eyebrow{margin:0 0 10px;color:var(--green);font-size:11px;font-weight:800;letter-spacing:.15em;text-transform:uppercase}
+.page-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:28px}
+.page-heading h1{margin:0;color:var(--forest-deep);font-size:clamp(30px,4vw,42px);font-weight:720;letter-spacing:-.045em;line-height:1.12}
+.page-description{max-width:590px;margin:11px 0 0;color:var(--muted);font-size:15px}
+.heading-date{flex:0 0 auto;padding:9px 13px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--muted);font-size:12px;font-weight:650}
+.signin-panel{overflow:hidden;display:grid;grid-template-columns:1.05fr .95fr;border:1px solid var(--line);border-radius:24px;background:#fff;box-shadow:var(--shadow)}
+.signin-intro{position:relative;min-height:300px;overflow:hidden;padding:42px;background:linear-gradient(145deg,#174b3d,#0d3028);color:#fff}
+.signin-intro:after{position:absolute;right:-84px;bottom:-160px;width:350px;height:350px;border:1px solid rgba(255,255,255,.09);border-radius:50%;box-shadow:0 0 0 28px rgba(255,255,255,.025),0 0 0 58px rgba(255,255,255,.02);content:""}
+.signin-kicker{position:relative;z-index:1;margin:0 0 46px;color:#b9d9c8;font-size:11px;font-weight:750;letter-spacing:.15em;text-transform:uppercase}
+.signin-intro h2{position:relative;z-index:1;max-width:430px;margin:0;font-size:clamp(26px,3vw,36px);font-weight:680;letter-spacing:-.035em;line-height:1.2}
+.signin-intro p:last-child{position:relative;z-index:1;max-width:390px;margin:14px 0 0;color:rgba(255,255,255,.72);font-size:14px}
+.signin-action{display:flex;flex-direction:column;justify-content:center;padding:38px 42px}
+.signin-action h3{margin:0;color:var(--forest-deep);font-size:19px;font-weight:700;letter-spacing:-.02em}
+.signin-action>p{margin:7px 0 22px;color:var(--muted);font-size:13px}
+#gbtn{min-height:44px}
+#msg{min-height:22px;margin-top:14px}
+.trust-note{display:flex;gap:10px;align-items:flex-start;margin:23px 0 0;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+.trust-mark{width:21px;height:21px;flex:0 0 auto;display:grid;place-items:center;border-radius:50%;background:var(--green-soft);color:var(--green);font-size:12px;font-weight:800}
+.dashboard-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 16px}
+.dashboard-bar h2{margin:0;color:var(--forest-deep);font-size:17px;font-weight:700;letter-spacing:-.02em}
+.dashboard-bar p{margin:3px 0 0;color:var(--muted);font-size:13px}
+.button-refresh{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:8px 13px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--forest);font-size:13px;font-weight:680;transition:border-color .18s ease,background .18s ease}
+.button-refresh:hover{border-color:#b6ccbe;background:#fbfdfb}
+.button-refresh:disabled{cursor:wait;opacity:.65}
+.refresh-icon{font-size:17px;line-height:1}
+.feedback{font-size:13px}
+.feedback.is-error{color:var(--red)}
+.feedback.is-info{color:var(--muted)}
+.feedback.is-success{color:var(--green)}
+.app-feedback{min-height:22px;margin:3px 0 12px}
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin:0 0 38px}
+.kpi{min-height:110px;padding:17px 17px 15px;border:1px solid var(--line);border-radius:15px;background:#fff;box-shadow:0 4px 15px rgba(20,48,38,.025)}
+.kpi-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.kpi-label{color:var(--muted);font-size:12px;font-weight:630}
+.kpi-dot{width:8px;height:8px;border-radius:50%;background:#99a69f}
+.kpi-number{display:block;margin-top:14px;color:var(--forest-deep);font-size:29px;font-weight:750;letter-spacing:-.045em;line-height:1}
+.kpi.blocked .kpi-dot{background:var(--red)}
+.kpi.progress .kpi-dot{background:var(--blue)}
+.kpi.pending .kpi-dot,.kpi.upcoming .kpi-dot{background:#b88126}
+.kpi.review .kpi-dot{background:#8171a7}
+.kpi.completed .kpi-dot{background:var(--green)}
+.task-section{margin:0 0 33px;scroll-margin-top:20px}
+.section-heading{display:flex;align-items:center;gap:10px;margin:0 0 12px}
+.section-heading h2{margin:0;color:var(--forest-deep);font-size:17px;font-weight:700;letter-spacing:-.02em}
+.section-count{min-width:25px;height:25px;display:grid;place-items:center;padding:0 7px;border-radius:999px;background:#e9eeea;color:#52625a;font-size:11px;font-weight:750}
+.task-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.task-card{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:16px;background:#fff;box-shadow:0 5px 18px rgba(20,48,38,.035);transition:box-shadow .18s ease,transform .18s ease}
+.task-card:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(20,48,38,.08)}
+.task-card.status-blocked{border-top:3px solid var(--red)}
+.task-card.status-in-progress{border-top:3px solid var(--blue)}
+.task-card.status-submitted{border-top:3px solid #8171a7}
+.task-card.status-completed{border-top:3px solid var(--green)}
+.task-card.status-not-started{border-top:3px solid #c4cec7}
+.task-main{padding:19px 20px 15px}
+.task-overline{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+.task-id{color:#738078;font-size:11px;font-weight:750;letter-spacing:.08em}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:730;line-height:1.25;white-space:nowrap}
+.pill:before{width:6px;height:6px;border-radius:50%;background:currentColor;content:""}
+.s-Not-Started{background:#f0f2f0;color:#59665f}
+.s-In-Progress{background:var(--blue-soft);color:var(--blue)}
+.s-Blocked{background:var(--red-soft);color:var(--red)}
+.s-Submitted-for-Review{background:#f1eef8;color:#67578f}
+.s-Completed{background:var(--green-soft);color:var(--green)}
+.task-title{margin:0;color:var(--ink);font-size:18px;font-weight:700;letter-spacing:-.025em;line-height:1.35;overflow-wrap:anywhere}
+.task-description{margin:7px 0 0;color:var(--muted);font-size:13px;line-height:1.55}
+.task-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:15px}
+.task-tag{display:inline-flex;align-items:center;min-height:25px;padding:3px 9px;border:1px solid #e8ede9;border-radius:7px;background:#fafbf9;color:#647169;font-size:11px;font-weight:620}
+.task-tag.is-overdue{border-color:#f4d4d0;background:var(--red-soft);color:var(--red)}
+.task-tag.is-due-soon{border-color:#f1dfb9;background:var(--amber-soft);color:var(--amber)}
+.progress-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:17px;color:var(--muted);font-size:11px;font-weight:650}
+.progress-row strong{color:var(--ink);font-size:12px}
+.progress-track{height:6px;overflow:hidden;margin-top:7px;border-radius:999px;background:#e9eeea}
+.progress-fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,#176a52,#69a483);transition:width .3s ease}
+.task-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 20px;border-top:1px solid #edf1ed;background:#fcfdfb}
+.task-footer-note{color:var(--muted);font-size:11px}
+.details-toggle{display:inline-flex;align-items:center;gap:7px;padding:6px 0;border:0;background:none;color:var(--green);font-size:12px;font-weight:720}
+.details-toggle:hover{color:var(--forest-deep)}
+.chevron{display:inline-block;transition:transform .18s ease}
+.details-toggle[aria-expanded="true"] .chevron{transform:rotate(180deg)}
+.task-details{padding:17px 20px 20px;border-top:1px solid var(--line);background:#fff}
+.detail-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 20px}
+.detail-item{min-width:0}
+.detail-item dt{margin:0 0 3px;color:#7a877f;font-size:10px;font-weight:780;letter-spacing:.08em;text-transform:uppercase}
+.detail-item dd{margin:0;color:#435149;font-size:12px;overflow-wrap:anywhere;white-space:pre-wrap}
+.detail-item.full{grid-column:1/-1}
+.locked-note{margin:0;padding:11px 12px;border:1px solid #d6e9dc;border-radius:10px;background:#f2f8f3;color:var(--green);font-size:12px;font-weight:620}
+.locked-note.approved{border-color:#e6def3;background:#f6f2fb;color:#655484}
+.form-heading{margin:0 0 4px;color:var(--forest-deep);font-size:14px;font-weight:730}
+.form-hint{margin:0 0 14px;color:var(--muted);font-size:11px}
+.update-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.field{display:block;min-width:0}
+.field.full{grid-column:1/-1}
+.field-label{display:block;margin-bottom:5px;color:#435149;font-size:11px;font-weight:700}
+.field-required{color:var(--red)}
+.field input,.field select,.field textarea{width:100%;min-height:40px;padding:9px 10px;border:1px solid #dbe4dd;border-radius:9px;background:#fff;color:var(--ink);font-size:12px;transition:border-color .15s ease,box-shadow .15s ease}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#78a88e;box-shadow:0 0 0 3px rgba(73,133,100,.1);outline:none}
+.field textarea{min-height:78px;resize:vertical;line-height:1.5}
+.field input::placeholder,.field textarea::placeholder{color:#9aa59e}
+.form-actions{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:1px}
+.form-note{max-width:250px;margin:0;color:var(--muted);font-size:10px;line-height:1.4}
+.button-primary{min-height:40px;padding:9px 15px;border:1px solid var(--green);border-radius:9px;background:var(--green);color:#fff;font-size:12px;font-weight:720;box-shadow:0 3px 8px rgba(23,106,82,.12);transition:background .18s ease,transform .18s ease}
+.button-primary:hover{transform:translateY(-1px);background:var(--forest)}
+.button-primary:disabled{transform:none;cursor:wait;opacity:.65}
+.form-feedback{grid-column:1/-1;min-height:18px;margin:0}
+.empty-state{padding:44px 24px;border:1px dashed #ccd8cf;border-radius:16px;background:rgba(255,255,255,.65);text-align:center}
+.empty-mark{width:46px;height:46px;display:grid;place-items:center;margin:0 auto 13px;border-radius:14px;background:var(--green-soft);color:var(--green);font-size:19px;font-weight:800}
+.empty-state h3{margin:0;color:var(--forest-deep);font-size:17px}
+.empty-state p{max-width:390px;margin:7px auto 0;color:var(--muted);font-size:13px}
+.loading-state{padding:30px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--muted);text-align:center;font-size:13px}
+.spinner{width:16px;height:16px;display:inline-block;margin-right:8px;border:2px solid #d6e5da;border-top-color:var(--green);border-radius:50%;vertical-align:-3px;animation:spin .75s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.page-footer{display:flex;justify-content:space-between;gap:16px;margin-top:48px;padding-top:18px;border-top:1px solid var(--line);color:#818c85;font-size:11px}
+.page-footer span:last-child{text-align:right}
+@media(max-width:900px){
+  .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .signin-intro{padding:34px}
+  .signin-action{padding:32px}
+}
+@media(max-width:680px){
+  .topbar-inner{min-height:68px;padding:12px 18px}
+  .brand-mark{width:38px;height:38px}
+  .brand-subtitle{font-size:11px}
+  .member-chip{font-size:0}
+  .avatar{font-size:12px}
+  .button-quiet{padding:7px 9px;font-size:12px}
+  .page-shell{padding:32px 18px 48px}
+  .page-heading{align-items:flex-start;margin-bottom:21px}
+  .heading-date{display:none}
+  .signin-panel{grid-template-columns:1fr}
+  .signin-intro{min-height:0;padding:27px 26px 29px}
+  .signin-kicker{margin-bottom:23px}
+  .signin-intro h2{max-width:400px;font-size:27px}
+  .signin-intro p:last-child{margin-top:9px}
+  .signin-action{padding:26px}
+  .kpis{gap:8px;margin-bottom:29px}
+  .kpi{min-height:91px;padding:12px}
+  .kpi-label{font-size:10px}
+  .kpi-number{margin-top:11px;font-size:25px}
+  .task-grid{grid-template-columns:1fr}
+  .page-footer{flex-direction:column;gap:5px}
+  .page-footer span:last-child{text-align:left}
+}
+@media(max-width:390px){
+  .topbar-inner{padding-inline:13px}
+  .brand{gap:9px}
+  .brand-name{font-size:12px}
+  .brand-subtitle{font-size:10px}
+  .header-actions{gap:7px}
+  .page-shell{padding-inline:13px}
+  .page-heading h1{font-size:31px}
+  .kpi{min-height:85px;padding:10px}
+  .kpi-label{font-size:9px}
+  .task-main,.task-details{padding-inline:15px}
+  .task-footer{padding-inline:15px}
+  .detail-list{grid-template-columns:1fr}
+  .detail-item.full{grid-column:auto}
+  .update-form{grid-template-columns:1fr}
+  .field.full,.form-actions,.form-feedback{grid-column:auto}
+  .form-actions{align-items:flex-start;flex-direction:column}
+  .form-note{max-width:none}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
 <body>
-<header><h1>Nile Flow Industry Attachment 2026</h1><p>My tasks. You can only see and update your own.</p></header>
-<main>
-<div id="signin" class="card"><p>Sign in with the Google account your supervisor registered for you.</p><div id="gbtn"></div><div id="msg" class="err"></div></div>
-<div id="app" class="hide"><div id="who" class="meta"></div><div id="kpis" class="kpis"></div><div id="lists"></div><button class="sec" id="out">Sign out</button></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">NF</div>
+      <div class="brand-copy">
+        <p class="brand-name">Nile Flow Industry Attachment</p>
+        <p class="brand-subtitle">Member workspace · 2026</p>
+      </div>
+    </div>
+    <div class="header-actions is-hidden" id="headerActions">
+      <div class="member-chip"><span class="avatar" id="avatar" aria-hidden="true">NF</span><span id="memberName"></span></div>
+      <button class="button-quiet" id="out" type="button">Sign out</button>
+    </div>
+  </div>
+</header>
+
+<main class="page-shell">
+  <section class="page-heading" aria-labelledby="pageTitle">
+    <div>
+      <p class="eyebrow" id="pageEyebrow">Your attachment, in focus</p>
+      <h1 id="pageTitle">A clear view of your work.</h1>
+      <p class="page-description" id="pageDescription">Keep track of priorities, share progress, and stay connected to what’s next.</p>
+    </div>
+    <div class="heading-date" id="todayLabel"></div>
+  </section>
+
+  <section id="signin" class="signin-panel" aria-label="Sign in to the member portal">
+    <div class="signin-intro">
+      <p class="signin-kicker">Welcome to your workspace</p>
+      <h2>Your next step starts with a clear picture.</h2>
+      <p>See your assigned work, record progress, and share deliverables with your supervisor—all in one place.</p>
+    </div>
+    <div class="signin-action">
+      <h3>Sign in to continue</h3>
+      <p>Use the Google account registered by your supervisor.</p>
+      <div id="gbtn"></div>
+      <div id="msg" class="feedback" role="status" aria-live="polite"></div>
+      <div class="trust-note"><span class="trust-mark" aria-hidden="true">✓</span><span>Your tasks and updates are private to your account. You can only access work assigned to you.</span></div>
+    </div>
+  </section>
+
+  <section id="app" class="is-hidden" aria-label="Your task dashboard">
+    <div class="dashboard-bar">
+      <div><h2>Your progress at a glance</h2><p>Stay on top of your work and keep your supervisor up to date.</p></div>
+      <button class="button-refresh" id="refresh" type="button"><span class="refresh-icon" aria-hidden="true">↻</span> Refresh</button>
+    </div>
+    <div class="feedback app-feedback" id="appStatus" role="status" aria-live="polite"></div>
+    <div id="kpis" class="kpis" aria-label="Task status summary"></div>
+    <div id="lists"></div>
+  </section>
+
+  <footer class="page-footer">
+    <span>Nile Flow Industry Attachment Programme · 2026</span>
+    <span>Need help? Contact your programme supervisor.</span>
+  </footer>
 </main>
+
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
 /* ===== CONFIGURE THESE TWO VALUES (both are public; no secrets belong in this file) ===== */
 var GOOGLE_CLIENT_ID = '1012978505363-ffg928t7617tdd2ife8b3abeonfbcvao.apps.googleusercontent.com';
 var API_URL = 'https://nile-flow-api.onrender.com/api';
 /* ========================================================================================= */
-var idToken = null; // memory only: never stored
-var el = function(t, p, txt){ var e=document.createElement(t); if(p) for(var k in p) e[k]=p[k]; if(txt!==undefined) e.textContent=txt; return e; };
-function say(id, text, cls){ var n=document.getElementById(id); n.className=cls||'err'; n.textContent=text||''; }
-
-window.onload = function(){
-  var t = setInterval(function(){
-    if (!window.google || !google.accounts) return; clearInterval(t);
-    google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: function(r){ idToken = r.credential; load(); }, auto_select: false });
-    google.accounts.id.renderButton(document.getElementById('gbtn'), { theme:'outline', size:'large', text:'signin_with' });
-  }, 200);
+var idToken = null;
+var el = function(tag, props, text){
+  var node = document.createElement(tag);
+  if(props) Object.keys(props).forEach(function(key){ node[key]=props[key]; });
+  if(text !== undefined) node.textContent = text;
+  return node;
 };
-document.getElementById('out').onclick = function(){ idToken=null; location.reload(); };
-
+var textNode = function(value){ return document.createTextNode(value == null ? '' : String(value)); };
+function feedback(id, text, kind){
+  var node = document.getElementById(id);
+  node.className = 'feedback' + (kind ? ' is-' + kind : '');
+  node.textContent = text || '';
+}
+function today(){
+  return new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
+}
+function initials(name){
+  return String(name || '').trim().split(/\s+/).slice(0,2).map(function(part){return part.charAt(0);}).join('').toUpperCase() || 'NF';
+}
+function statusClass(status){
+  return {
+    'Not Started':'s-Not-Started',
+    'In Progress':'s-In-Progress',
+    'Blocked':'s-Blocked',
+    'Submitted for Review':'s-Submitted-for-Review',
+    'Completed':'s-Completed'
+  }[status] || 's-Not-Started';
+}
+function taskClass(status){
+  return {
+    'Not Started':'status-not-started',
+    'In Progress':'status-in-progress',
+    'Blocked':'status-blocked',
+    'Submitted for Review':'status-submitted',
+    'Completed':'status-completed'
+  }[status] || 'status-not-started';
+}
 function api(body){
   body.idToken = idToken;
-  return fetch(API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body) })
-    .then(function(r){ return r.json(); });
+  return fetch(API_URL,{
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify(body)
+  }).then(function(response){
+    return response.json().then(function(data){
+      if(!response.ok && data.ok !== false) throw new Error('The service could not complete the request.');
+      return data;
+    });
+  });
 }
-function load(){
-  say('msg','Loading...','meta');
-  api({action:'getMyTasks'}).then(function(d){
-    if(!d.ok){ idToken=null; say('msg', d.error || 'Access denied.'); return; }
-    document.getElementById('signin').classList.add('hide'); document.getElementById('app').classList.remove('hide');
-    render(d);
-  }).catch(function(){ say('msg','Network problem. Check your connection and try again.'); });
+window.onload = function(){
+  document.getElementById('todayLabel').textContent = today();
+  var waitForGoogle = setInterval(function(){
+    if(!window.google || !google.accounts) return;
+    clearInterval(waitForGoogle);
+    google.accounts.id.initialize({
+      client_id:GOOGLE_CLIENT_ID,
+      callback:function(response){ idToken=response.credential; load(true); },
+      auto_select:false
+    });
+    google.accounts.id.renderButton(document.getElementById('gbtn'),{
+      theme:'outline',size:'large',shape:'pill',text:'signin_with',width:280
+    });
+  },200);
+};
+document.getElementById('out').onclick = function(){
+  idToken=null;
+  location.reload();
+};
+document.getElementById('refresh').onclick = function(){ load(false); };
+function load(showLoading){
+  var app = document.getElementById('app');
+  var signin = document.getElementById('signin');
+  var refresh = document.getElementById('refresh');
+  if(showLoading){
+    signin.classList.add('is-hidden');
+    app.classList.remove('is-hidden');
+    document.getElementById('lists').replaceChildren(
+      el('div',{className:'loading-state'},'Loading your tasks…')
+    );
+  }
+  refresh.disabled = true;
+  feedback('appStatus','', '');
+  api({action:'getMyTasks'}).then(function(data){
+    if(!data.ok){
+      idToken=null;
+      app.classList.add('is-hidden');
+      signin.classList.remove('is-hidden');
+      feedback('msg',data.error || 'Access denied.','error');
+      return;
+    }
+    document.getElementById('headerActions').classList.remove('is-hidden');
+    document.getElementById('memberName').textContent = data.member.name;
+    document.getElementById('avatar').textContent = initials(data.member.name);
+    document.getElementById('pageEyebrow').textContent = 'Member dashboard';
+    document.getElementById('pageTitle').textContent = 'Welcome back, ' + String(data.member.name || '').split(/\s+/)[0] + '.';
+    document.getElementById('pageDescription').textContent = 'Here’s your current workload. Open a task to share progress or update your supervisor.';
+    render(data);
+  }).catch(function(){
+    feedback('appStatus','We couldn’t reach the task service. Check your connection and try again.','error');
+    if(showLoading){
+      document.getElementById('lists').replaceChildren(
+        el('div',{className:'loading-state'},'Your tasks are temporarily unavailable. Use Refresh to try again.')
+      );
+    }
+  }).finally(function(){
+    refresh.disabled = false;
+  });
 }
-function today(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-function render(d){
-  document.getElementById('who').textContent = 'Signed in as ' + d.member.name;
-  var tasks = d.tasks, by = function(f){ return tasks.filter(f); }, td = today();
+function render(data){
+  var tasks = data.tasks || [];
+  var by = function(status){ return tasks.filter(function(task){return task.Status===status;}); };
+  var date = new Date();
+  var todayKey = date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');
   var groups = [
-    ['Blocked', by(function(t){return t.Status==='Blocked';})],
-    ['In progress', by(function(t){return t.Status==='In Progress';})],
-    ['Pending (not started)', by(function(t){return t.Status==='Not Started' && (!t['Start Date'] || t['Start Date']<=td);})],
-    ['Upcoming', by(function(t){return t.Status==='Not Started' && t['Start Date'] && t['Start Date']>td;})],
-    ['Submitted for review', by(function(t){return t.Status==='Submitted for Review';})],
-    ['Completed', by(function(t){return t.Status==='Completed';})]
+    {title:'Blocked',key:'blocked',items:by('Blocked')},
+    {title:'In progress',key:'progress',items:by('In Progress')},
+    {title:'Pending',key:'pending',items:tasks.filter(function(task){return task.Status==='Not Started' && (!task['Start Date'] || task['Start Date']<=todayKey);})},
+    {title:'Upcoming',key:'upcoming',items:tasks.filter(function(task){return task.Status==='Not Started' && task['Start Date'] && task['Start Date']>todayKey;})},
+    {title:'Submitted for review',key:'review',items:by('Submitted for Review')},
+    {title:'Completed',key:'completed',items:by('Completed')}
   ];
-  var k = document.getElementById('kpis'); k.textContent='';
-  groups.forEach(function(g){ var b=el('div',{className:'kpi'}); b.appendChild(el('b',null,String(g[1].length))); b.appendChild(el('span',null,g[0])); k.appendChild(b); });
-  var L = document.getElementById('lists'); L.textContent='';
-  groups.forEach(function(g){ if(!g[1].length) return; L.appendChild(el('h2',null,g[0]+' ('+g[1].length+')')); g[1].forEach(function(t){ L.appendChild(card(t)); }); });
-  if(!tasks.length) L.appendChild(el('p',null,'No tasks assigned yet.'));
+  renderKpis(groups);
+  var lists = document.getElementById('lists');
+  lists.replaceChildren();
+  if(!tasks.length){
+    var empty = el('div',{className:'empty-state'});
+    empty.appendChild(el('div',{className:'empty-mark','aria-hidden':'true'},'✓'));
+    empty.appendChild(el('h3',null,'You’re all caught up'));
+    empty.appendChild(el('p',null,'There are no tasks assigned to you right now. New work will appear here when your supervisor assigns it.'));
+    lists.appendChild(empty);
+    return;
+  }
+  groups.forEach(function(group){
+    if(!group.items.length) return;
+    var section = el('section',{className:'task-section','aria-label':group.title+' tasks'});
+    var heading = el('div',{className:'section-heading'});
+    heading.appendChild(el('h2',null,group.title));
+    heading.appendChild(el('span',{className:'section-count','aria-label':group.items.length+' tasks'},String(group.items.length)));
+    section.appendChild(heading);
+    var grid = el('div',{className:'task-grid'});
+    group.items.forEach(function(task){grid.appendChild(card(task));});
+    section.appendChild(grid);
+    lists.appendChild(section);
+  });
 }
-function card(t){
-  var c = el('div',{className:'card'});
-  var top = el('div'); top.appendChild(el('b',null,t['Task ID']+'  '+t['Task Title'])); top.appendChild(document.createTextNode('  '));
-  top.appendChild(el('span',{className:'pill s-'+t.Status},t.Status)); c.appendChild(top);
-  var due = el('div',{className:'meta'}, 'Due '+(t['Due Date']||'not set')+' | Priority '+t.Priority+' | '+t['Department / Track']+' | Progress '+t['Progress %']+'%');
-  if(t['Deadline Health']==='Overdue') due.appendChild(el('span',{className:'late'},'  OVERDUE')); else if(t['Deadline Health']==='Due Soon') due.appendChild(el('span',{className:'late'},'  Due soon'));
-  c.appendChild(due);
-  var det = el('details'); det.appendChild(el('summary',null,'Details and update'));
-  [['Description',t['Task Description']],['Expected outcome',t['Expected Outcome / Acceptance Criteria']],['Supervisor',t['Assigned By / Supervisor']],['Supervisor feedback',t['Supervisor Feedback']],['Review decision',t['Review Decision']]].forEach(function(p){
-    if(p[1]){ var d=el('p',{className:'meta'}); d.appendChild(el('b',null,p[0]+': ')); d.appendChild(document.createTextNode(p[1])); det.appendChild(d); } });
-  if(t.Status==='Completed'){ det.appendChild(el('p',{className:'ok'},'Completed and locked.')); c.appendChild(det); return c; }
-  var f = el('form');
-  var sel = el('select'); ['Not Started','In Progress','Blocked','Submitted for Review'].forEach(function(s){ var o=el('option',{value:s},s); if(s===t.Status) o.selected=true; sel.appendChild(o); });
-  var pr = el('input',{type:'number',min:0,max:100,step:1,value:t['Progress %']});
-  var up = el('textarea',{rows:2,maxLength:2000,value:t['Latest Progress Update']});
-  var wk = el('textarea',{rows:2,maxLength:2000,value:t['Work Completed']});
-  var bl = el('textarea',{rows:2,maxLength:2000,value:t['Blockers / Support Required']});
-  var lk = el('input',{type:'url',maxLength:500,placeholder:'https://...',value:t['Deliverable / Evidence Link']});
-  [['Status',sel],['Progress %',pr],['Latest progress update',up],['Work completed',wk],['Blockers / support required (required if Blocked)',bl],['Deliverable / evidence link (https, required to submit)',lk]].forEach(function(p){ f.appendChild(el('label',null,p[0])); f.appendChild(p[1]); });
-  var msg = el('div'); var btn = el('button',{type:'submit'},'Save update'); f.appendChild(btn); f.appendChild(msg);
-  f.onsubmit = function(ev){ ev.preventDefault(); btn.disabled=true; msg.className='meta'; msg.textContent='Saving...';
-    api({action:'updateTask', taskId:t['Task ID'], updates:{ 'Status':sel.value,'Progress %':Number(pr.value),'Latest Progress Update':up.value,'Work Completed':wk.value,'Blockers / Support Required':bl.value,'Deliverable / Evidence Link':lk.value }})
-      .then(function(d){ btn.disabled=false; if(d.ok){ load(); } else { msg.className='err'; msg.textContent=d.error||'Could not save.'; } })
-      .catch(function(){ btn.disabled=false; msg.className='err'; msg.textContent='Network problem. Your changes were not saved.'; }); };
-  det.appendChild(f); c.appendChild(det); return c;
+function renderKpis(groups){
+  var kpis = document.getElementById('kpis');
+  kpis.replaceChildren();
+  groups.forEach(function(group){
+    var card = el('div',{className:'kpi '+group.key});
+    var top = el('div',{className:'kpi-top'});
+    top.appendChild(el('span',{className:'kpi-label'},group.title));
+    top.appendChild(el('span',{className:'kpi-dot','aria-hidden':'true'}));
+    card.appendChild(top);
+    card.appendChild(el('strong',{className:'kpi-number'},String(group.items.length)));
+    kpis.appendChild(card);
+  });
+}
+function addDetail(list,label,value,full){
+  if(value === '' || value === null || value === undefined) return;
+  var item = el('div',{className:'detail-item'+(full?' full':'')});
+  item.appendChild(el('dt',null,label));
+  item.appendChild(el('dd',null,String(value)));
+  list.appendChild(item);
+}
+function addField(form,labelText,control,options){
+  options = options || {};
+  var label = el('label',{className:'field'+(options.full?' full':'')});
+  var caption = el('span',{className:'field-label'},labelText);
+  if(options.required){
+    caption.appendChild(textNode(' '));
+    caption.appendChild(el('span',{className:'field-required','aria-hidden':'true'},'*'));
+  }
+  label.appendChild(caption);
+  label.appendChild(control);
+  form.appendChild(label);
+}
+function card(task){
+  var status = task.Status || 'Not Started';
+  var article = el('article',{className:'task-card '+taskClass(status)});
+  var main = el('div',{className:'task-main'});
+  var overline = el('div',{className:'task-overline'});
+  overline.appendChild(el('span',{className:'task-id'},'TASK '+String(task['Task ID'] || '')));
+  overline.appendChild(el('span',{className:'pill '+statusClass(status)},status));
+  main.appendChild(overline);
+  main.appendChild(el('h3',{className:'task-title'},task['Task Title'] || 'Untitled task'));
+  if(task['Task Description']) main.appendChild(el('p',{className:'task-description'},task['Task Description']));
+
+  var tags = el('div',{className:'task-tags'});
+  if(task['Due Date']) tags.appendChild(el('span',{className:'task-tag'},'Due '+task['Due Date']));
+  if(task.Priority) tags.appendChild(el('span',{className:'task-tag'},task.Priority+' priority'));
+  if(task['Department / Track']) tags.appendChild(el('span',{className:'task-tag'},task['Department / Track']));
+  if(task['Deadline Health']==='Overdue') tags.appendChild(el('span',{className:'task-tag is-overdue'},'Overdue'));
+  else if(task['Deadline Health']==='Due Soon') tags.appendChild(el('span',{className:'task-tag is-due-soon'},'Due soon'));
+  if(tags.childNodes.length) main.appendChild(tags);
+
+  var percent = Math.max(0,Math.min(100,Number(task['Progress %']) || 0));
+  var progressRow = el('div',{className:'progress-row'});
+  progressRow.appendChild(el('span',null,'Progress'));
+  progressRow.appendChild(el('strong',null,percent+'%'));
+  main.appendChild(progressRow);
+  var track = el('div',{className:'progress-track','role':'progressbar','aria-label':'Task progress','aria-valuemin':'0','aria-valuemax':'100','aria-valuenow':String(percent)});
+  track.appendChild(el('div',{className:'progress-fill',style:'width:'+percent+'%'}));
+  main.appendChild(track);
+  article.appendChild(main);
+
+  var footer = el('div',{className:'task-footer'});
+  footer.appendChild(el('span',{className:'task-footer-note'},status==='Completed'?'Work completed':'Task details and updates'));
+  var detailsId = 'task-details-' + String(task['Task ID'] || '').replace(/[^A-Za-z0-9_-]/g,'');
+  var detailsButton = el('button',{className:'details-toggle',type:'button','aria-expanded':'false','aria-controls':detailsId});
+  detailsButton.appendChild(el('span',null,status==='Completed'?'View details':'View details & update'));
+  detailsButton.appendChild(el('span',{className:'chevron','aria-hidden':'true'},'⌄'));
+  footer.appendChild(detailsButton);
+  article.appendChild(footer);
+
+  var content = el('div',{className:'task-details is-hidden',id:detailsId});
+  var detailList = el('dl',{className:'detail-list'});
+  addDetail(detailList,'Expected outcome',task['Expected Outcome / Acceptance Criteria'],true);
+  addDetail(detailList,'Supervisor',task['Assigned By / Supervisor']);
+  addDetail(detailList,'Supervisor feedback',task['Supervisor Feedback'],true);
+  addDetail(detailList,'Review decision',task['Review Decision']);
+  if(detailList.childNodes.length) content.appendChild(detailList);
+
+  if(status==='Completed' || task['Review Decision']==='Approved'){
+    var locked = el('p',{className:'locked-note'+(task['Review Decision']==='Approved'?' approved':'')});
+    locked.textContent = task['Review Decision']==='Approved'
+      ? 'Approved by your supervisor. This task is locked.'
+      : 'Completed and locked. Contact your supervisor if this task needs to be reopened.';
+    content.appendChild(locked);
+  }else{
+    content.appendChild(updateForm(task));
+  }
+  detailsButton.addEventListener('click',function(){
+    var expanded = detailsButton.getAttribute('aria-expanded') === 'true';
+    detailsButton.setAttribute('aria-expanded',String(!expanded));
+    content.classList.toggle('is-hidden',expanded);
+  });
+  article.appendChild(content);
+  return article;
+}
+function updateForm(task){
+  var form = el('form',{className:'update-form'});
+  form.appendChild(el('h4',{className:'form-heading full'},'Share a progress update'));
+  form.appendChild(el('p',{className:'form-hint full'},'Your supervisor can see updates saved to this task.'));
+  var status = el('select',{name:'status','aria-label':'Task status'});
+  ['Not Started','In Progress','Blocked','Submitted for Review'].forEach(function(value){
+    var option = el('option',{value:value},value);
+    if(value===task.Status) option.selected = true;
+    status.appendChild(option);
+  });
+  var progress = el('input',{name:'progress',type:'number',min:'0',max:'100',step:'1',value:task['Progress %'] || 0,inputMode:'numeric'});
+  var update = el('textarea',{name:'update',rows:'3',maxLength:'2000',placeholder:'What did you work on most recently?'});
+  update.value = task['Latest Progress Update'] || '';
+  var completed = el('textarea',{name:'completed',rows:'3',maxLength:'2000',placeholder:'Describe the work you have completed so far.'});
+  completed.value = task['Work Completed'] || '';
+  var blockers = el('textarea',{name:'blockers',rows:'3',maxLength:'2000',placeholder:'Describe what is blocking you and what support would help.'});
+  blockers.value = task['Blockers / Support Required'] || '';
+  var link = el('input',{name:'evidence',type:'url',maxLength:'500',placeholder:'https://…'});
+  link.value = task['Deliverable / Evidence Link'] || '';
+  addField(form,'Status',status);
+  addField(form,'Progress',progress);
+  addField(form,'Latest progress update',update,{full:true});
+  addField(form,'Work completed',completed,{full:true});
+  addField(form,'Blockers / support required',blockers,{full:true});
+  addField(form,'Evidence link',link,{full:true});
+  var actions = el('div',{className:'form-actions'});
+  actions.appendChild(el('p',{className:'form-note'},'Blocked tasks need a blocker note. Submitting for review needs an https evidence link.'));
+  var save = el('button',{className:'button-primary',type:'submit'},'Save update');
+  actions.appendChild(save);
+  form.appendChild(actions);
+  var message = el('div',{className:'feedback form-feedback full','role':'status','aria-live':'polite'});
+  form.appendChild(message);
+  form.addEventListener('submit',function(event){
+    event.preventDefault();
+    save.disabled = true;
+    save.textContent = 'Saving…';
+    message.className = 'feedback form-feedback full is-info';
+    message.textContent = 'Saving your update…';
+    api({
+      action:'updateTask',
+      taskId:task['Task ID'],
+      updates:{
+        'Status':status.value,
+        'Progress %':Number(progress.value),
+        'Latest Progress Update':update.value,
+        'Work Completed':completed.value,
+        'Blockers / Support Required':blockers.value,
+        'Deliverable / Evidence Link':link.value
+      }
+    }).then(function(result){
+      if(result.ok){
+        feedback('appStatus','Update saved. Refreshing your task list…','success');
+        load(false);
+      }else{
+        message.className = 'feedback form-feedback full is-error';
+        message.textContent = result.error || 'Your update could not be saved.';
+      }
+    }).catch(function(){
+      message.className = 'feedback form-feedback full is-error';
+      message.textContent = 'We couldn’t reach the task service. Your changes were not saved.';
+    }).finally(function(){
+      save.disabled = false;
+      save.textContent = 'Save update';
+    });
+  });
+  return form;
 }
 </script>
 </body>
