@@ -151,11 +151,21 @@ function createServer({ upstreamUrl, portalOrigin, fetchImpl = globalThis.fetch 
       try {
         result = JSON.parse(upstreamBody);
       } catch {
+        console.error(
+          'Apps Script returned a non-JSON response:',
+          upstreamResponse.status,
+          upstreamResponse.headers.get('content-type') || 'unknown content type'
+        );
         jsonResponse(response, 502, { ok: false, error: 'API returned an invalid response.' }, config.portalOrigin);
         return;
       }
 
       if (!upstreamResponse.ok) {
+        console.error(
+          'Apps Script returned an HTTP error:',
+          upstreamResponse.status,
+          upstreamResponse.headers.get('content-type') || 'unknown content type'
+        );
         jsonResponse(response, 502, { ok: false, error: 'API request could not be completed.' }, config.portalOrigin);
         return;
       }
