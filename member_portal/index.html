@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com; frame-src https://accounts.google.com; connect-src https://script.google.com https://script.googleusercontent.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://accounts.google.com; img-src 'self' data: https:">
+<title>Nile Flow Attachment: My Tasks</title>
+<style>
+:root{--g:#1b4332;--m:#2d6a4f;--l:#d8f3dc;--bg:#f6faf7;--t:#1d2b24;--r:#c00000;--a:#bf8f00;--b:#2e75b6}
+*{box-sizing:border-box}body{margin:0;font:15px/1.45 system-ui,Arial,sans-serif;background:var(--bg);color:var(--t)}
+header{background:var(--g);color:#fff;padding:14px 16px}header h1{margin:0;font-size:18px}header p{margin:2px 0 0;font-size:13px;opacity:.85}
+main{max-width:860px;margin:0 auto;padding:16px}
+.card{background:#fff;border:1px solid #d5e3da;border-radius:10px;padding:14px;margin:10px 0}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600;color:#fff}
+.s-Not\ Started{background:#7f7f7f}.s-In\ Progress{background:var(--b)}.s-Blocked{background:var(--r)}.s-Submitted\ for\ Review{background:var(--a)}.s-Completed{background:#2e7d32}
+h2{font-size:15px;margin:22px 0 4px;color:var(--m)}
+.meta{font-size:13px;color:#4d5f55}
+label{display:block;font-size:13px;font-weight:600;margin:10px 0 3px}
+input,select,textarea{width:100%;padding:8px;border:1px solid #b9cdc0;border-radius:6px;font:inherit}
+button{background:var(--m);color:#fff;border:0;border-radius:6px;padding:9px 16px;font:inherit;cursor:pointer;margin-top:12px}
+button.sec{background:#fff;color:var(--m);border:1px solid var(--m)}
+.err{color:var(--r);font-size:13px;margin-top:8px}.ok{color:#2e7d32;font-size:13px;margin-top:8px}
+.kpis{display:flex;gap:8px;flex-wrap:wrap}.kpi{flex:1 1 90px;background:#fff;border:1px solid #d5e3da;border-radius:8px;padding:8px;text-align:center}
+.kpi b{display:block;font-size:20px;color:var(--g)}
+.late{color:var(--r);font-weight:600}
+.hide{display:none}
+</style></head>
+<body>
+<header><h1>Nile Flow Industry Attachment 2026</h1><p>My tasks. You can only see and update your own.</p></header>
+<main>
+<div id="signin" class="card"><p>Sign in with the Google account your supervisor registered for you.</p><div id="gbtn"></div><div id="msg" class="err"></div></div>
+<div id="app" class="hide"><div id="who" class="meta"></div><div id="kpis" class="kpis"></div><div id="lists"></div><button class="sec" id="out">Sign out</button></div>
+</main>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+/* ===== CONFIGURE THESE TWO VALUES (both are public; no secrets belong in this file) ===== */
+var GOOGLE_CLIENT_ID = '1012978505363-ffg928t7617tdd2ife8b3abeonfbcvao.apps.googleusercontent.com';
+var API_URL = 'https://script.google.com/macros/s/AKfycbwn0krAKVDZbBOG21SrFVX1wU_P6liYI-v9oLvXv8v-PKvGxnd-9i0xSkIMQf51lAk71A/exec';
+/* ========================================================================================= */
+var idToken = null; // memory only: never stored
+var el = function(t, p, txt){ var e=document.createElement(t); if(p) for(var k in p) e[k]=p[k]; if(txt!==undefined) e.textContent=txt; return e; };
+function say(id, text, cls){ var n=document.getElementById(id); n.className=cls||'err'; n.textContent=text||''; }
+
+window.onload = function(){
+  var t = setInterval(function(){
+    if (!window.google || !google.accounts) return; clearInterval(t);
+    google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: function(r){ idToken = r.credential; load(); }, auto_select: false });
+    google.accounts.id.renderButton(document.getElementById('gbtn'), { theme:'outline', size:'large', text:'signin_with' });
+  }, 200);
+};
+document.getElementById('out').onclick = function(){ idToken=null; location.reload(); };
+
+function api(body){
+  body.idToken = idToken;
+  return fetch(API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body) })
+    .then(function(r){ return r.json(); });
+}
+function load(){
+  say('msg','Loading...','meta');
+  api({action:'getMyTasks'}).then(function(d){
+    if(!d.ok){ idToken=null; say('msg', d.error || 'Access denied.'); return; }
+    document.getElementById('signin').classList.add('hide'); document.getElementById('app').classList.remove('hide');
+    render(d);
+  }).catch(function(){ say('msg','Network problem. Check your connection and try again.'); });
+}
+function today(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function render(d){
+  document.getElementById('who').textContent = 'Signed in as ' + d.member.name;
+  var tasks = d.tasks, by = function(f){ return tasks.filter(f); }, td = today();
+  var groups = [
+    ['Blocked', by(function(t){return t.Status==='Blocked';})],
+    ['In progress', by(function(t){return t.Status==='In Progress';})],
+    ['Pending (not started)', by(function(t){return t.Status==='Not Started' && (!t['Start Date'] || t['Start Date']<=td);})],
+    ['Upcoming', by(function(t){return t.Status==='Not Started' && t['Start Date'] && t['Start Date']>td;})],
+    ['Submitted for review', by(function(t){return t.Status==='Submitted for Review';})],
+    ['Completed', by(function(t){return t.Status==='Completed';})]
+  ];
+  var k = document.getElementById('kpis'); k.textContent='';
+  groups.forEach(function(g){ var b=el('div',{className:'kpi'}); b.appendChild(el('b',null,String(g[1].length))); b.appendChild(el('span',null,g[0])); k.appendChild(b); });
+  var L = document.getElementById('lists'); L.textContent='';
+  groups.forEach(function(g){ if(!g[1].length) return; L.appendChild(el('h2',null,g[0]+' ('+g[1].length+')')); g[1].forEach(function(t){ L.appendChild(card(t)); }); });
+  if(!tasks.length) L.appendChild(el('p',null,'No tasks assigned yet.'));
+}
+function card(t){
+  var c = el('div',{className:'card'});
+  var top = el('div'); top.appendChild(el('b',null,t['Task ID']+'  '+t['Task Title'])); top.appendChild(document.createTextNode('  '));
+  top.appendChild(el('span',{className:'pill s-'+t.Status},t.Status)); c.appendChild(top);
+  var due = el('div',{className:'meta'}, 'Due '+(t['Due Date']||'not set')+' | Priority '+t.Priority+' | '+t['Department / Track']+' | Progress '+t['Progress %']+'%');
+  if(t['Deadline Health']==='Overdue') due.appendChild(el('span',{className:'late'},'  OVERDUE')); else if(t['Deadline Health']==='Due Soon') due.appendChild(el('span',{className:'late'},'  Due soon'));
+  c.appendChild(due);
+  var det = el('details'); det.appendChild(el('summary',null,'Details and update'));
+  [['Description',t['Task Description']],['Expected outcome',t['Expected Outcome / Acceptance Criteria']],['Supervisor',t['Assigned By / Supervisor']],['Supervisor feedback',t['Supervisor Feedback']],['Review decision',t['Review Decision']]].forEach(function(p){
+    if(p[1]){ var d=el('p',{className:'meta'}); d.appendChild(el('b',null,p[0]+': ')); d.appendChild(document.createTextNode(p[1])); det.appendChild(d); } });
+  if(t.Status==='Completed'){ det.appendChild(el('p',{className:'ok'},'Completed and locked.')); c.appendChild(det); return c; }
+  var f = el('form');
+  var sel = el('select'); ['Not Started','In Progress','Blocked','Submitted for Review'].forEach(function(s){ var o=el('option',{value:s},s); if(s===t.Status) o.selected=true; sel.appendChild(o); });
+  var pr = el('input',{type:'number',min:0,max:100,step:1,value:t['Progress %']});
+  var up = el('textarea',{rows:2,maxLength:2000,value:t['Latest Progress Update']});
+  var wk = el('textarea',{rows:2,maxLength:2000,value:t['Work Completed']});
+  var bl = el('textarea',{rows:2,maxLength:2000,value:t['Blockers / Support Required']});
+  var lk = el('input',{type:'url',maxLength:500,placeholder:'https://...',value:t['Deliverable / Evidence Link']});
+  [['Status',sel],['Progress %',pr],['Latest progress update',up],['Work completed',wk],['Blockers / support required (required if Blocked)',bl],['Deliverable / evidence link (https, required to submit)',lk]].forEach(function(p){ f.appendChild(el('label',null,p[0])); f.appendChild(p[1]); });
+  var msg = el('div'); var btn = el('button',{type:'submit'},'Save update'); f.appendChild(btn); f.appendChild(msg);
+  f.onsubmit = function(ev){ ev.preventDefault(); btn.disabled=true; msg.className='meta'; msg.textContent='Saving...';
+    api({action:'updateTask', taskId:t['Task ID'], updates:{ 'Status':sel.value,'Progress %':Number(pr.value),'Latest Progress Update':up.value,'Work Completed':wk.value,'Blockers / Support Required':bl.value,'Deliverable / Evidence Link':lk.value }})
+      .then(function(d){ btn.disabled=false; if(d.ok){ load(); } else { msg.className='err'; msg.textContent=d.error||'Could not save.'; } })
+      .catch(function(){ btn.disabled=false; msg.className='err'; msg.textContent='Network problem. Your changes were not saved.'; }); };
+  det.appendChild(f); c.appendChild(det); return c;
+}
+</script>
+</body>
+</html>
